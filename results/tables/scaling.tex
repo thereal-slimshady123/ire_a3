@@ -1,0 +1,15 @@
+\begin{tabular}{lrrr}
+\toprule
+Index & $N$ & QPS @ recall 0.95 & Slope vs $N$ \\
+\midrule
+Exact & 100,000 & 404.4 & -1.03 \\
+Exact & 300,000 & 119.3 & -1.03 \\
+Exact & 1,000,000 & 38.1 & -1.03 \\
+HNSW (M=16) & 100,000 & 18025.3 & -0.39 \\
+HNSW (M=16) & 300,000 & 10618.0 & -0.39 \\
+HNSW (M=16) & 1,000,000 & 7250.5 & -0.39 \\
+IVF-Flat & 100,000 & 10320.3 & -0.82 \\
+IVF-Flat & 300,000 & 2817.5 & -0.82 \\
+IVF-Flat & 1,000,000 & 1530.2 & -0.82 \\
+\bottomrule
+\end{tabular}
