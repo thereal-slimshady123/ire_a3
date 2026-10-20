@@ -65,6 +65,19 @@ def replace_rows(rows, name, key_fields=("dataset", "index")):
     return path
 
 
+def exact_sqdists(vectors, queries, ids):
+    """Exact squared distances from each query to the vectors named in ids (Q, k).
+
+    Needed because IVF-PQ returns approximate distances, which must not decide
+    whether a result is a tie or a hit. Missing ids (-1) get infinity.
+    """
+    safe = np.where(ids >= 0, ids, 0)
+    diff = vectors[safe].astype(np.float64) - queries[:, None, :].astype(np.float64)
+    d = (diff ** 2).sum(axis=2)
+    d[ids < 0] = np.inf
+    return d
+
+
 def exact_ground_truth(train, queries, k=10):
     """Exact k-NN with FAISS. Returns squared distances and ids, both (Q, k)."""
     index = faiss.IndexFlatL2(train.shape[1])

@@ -11,7 +11,7 @@ import time
 
 import faiss
 
-from common import index_bytes, load_or_compute_truth, replace_rows, threads
+from common import exact_sqdists, index_bytes, load_or_compute_truth, replace_rows, threads
 from data import load
 from metrics import median_time, recall_at_k
 
@@ -88,7 +88,8 @@ def sweep(dataset, kind, data, truth_d, builds=None):
         for value in values:
             set_search(index, kind, value)
             for split, q in splits.items():
-                dists, ids = index.search(q, K)
+                _, ids = index.search(q, K)
+                dists = exact_sqdists(train, q, ids)
                 recall = recall_at_k(ids, dists, kth[split], K)
                 with threads(1):
                     seconds = median_time(lambda: time_single_queries(index, q), 3)
