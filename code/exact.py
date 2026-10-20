@@ -9,11 +9,12 @@ import sys
 import faiss
 import numpy as np
 
-from common import TUNE_QUERIES, load_or_compute_truth, threads, write_rows
+from common import load_or_compute_truth, replace_rows, threads
 from data import load
 from metrics import median_time, recall_at_k
 
 K = 10
+SINGLE_QUERY_SAMPLE = 500
 
 
 def stored_neighbour_check(data, d_exact, train):
@@ -29,15 +30,18 @@ def stored_neighbour_check(data, d_exact, train):
 def timing_rows(index, queries, dataset):
     rows = []
     n = len(queries)
+    # One query at a time over all 1M+ vectors takes tens of minutes for the
+    # full half, so the single-query rate is measured on a fixed prefix of it.
+    sample = queries[:SINGLE_QUERY_SAMPLE]
 
     def single_query_loop():
-        for q in queries:
+        for q in sample:
             index.search(q[None, :], K)
 
     with threads(1):
         t = median_time(single_query_loop, repeats=3)
     rows.append(dict(dataset=dataset, index="exact", mode="single query, 1 thread",
-                     threads=1, queries=n, seconds=t, qps=n / t))
+                     threads=1, queries=len(sample), seconds=t, qps=len(sample) / t))
 
     with threads(1):
         t = median_time(lambda: index.search(queries, K), repeats=3)
@@ -56,7 +60,6 @@ def run(dataset):
     train = data["train"]
     report = data["queries"][data["report"]]
     d_truth, _ = load_or_compute_truth(dataset, train, data["queries"])
-    d_exact = d_truth[data["report"]]
 
     print(f"[{dataset}] vectors={train.shape} queries(report)={report.shape}")
     stored = stored_neighbour_check(
@@ -79,7 +82,7 @@ def main():
     all_rows = []
     for name in args.datasets:
         all_rows += run(name)
-    write_rows(all_rows, "part1_exact")
+    replace_rows(all_rows, "part1_exact")
     return 0
 
 

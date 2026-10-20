@@ -1,7 +1,6 @@
 """Shared helpers: result files, FAISS thread control, ground truth cache."""
 import csv
 from contextlib import contextmanager
-from pathlib import Path
 
 import faiss
 import numpy as np
@@ -34,6 +33,35 @@ def write_rows(rows, name):
         writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
         writer.writeheader()
         writer.writerows(rows)
+    return path
+
+
+def replace_rows(rows, name, key_fields=("dataset", "index")):
+    """Swap the rows for these keys into results/raw/<name>.csv, keeping the rest.
+
+    Lets one dataset or index be re-run without discarding the others.
+    """
+    RAW_DIR.mkdir(parents=True, exist_ok=True)
+    path = RAW_DIR / f"{name}.csv"
+    new = [{k: str(v) for k, v in r.items()} for r in rows]
+    new_keys = {tuple(r[k] for k in key_fields) for r in new}
+    old = []
+    if path.exists():
+        with open(path, newline="") as f:
+            old = [r for r in csv.DictReader(f)
+                   if tuple(r[k] for k in key_fields) not in new_keys]
+    merged = old + new
+    if not merged:
+        return path
+    fieldnames = []
+    for r in merged:
+        for k in r:
+            if k not in fieldnames:
+                fieldnames.append(k)
+    with open(path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, restval="")
+        writer.writeheader()
+        writer.writerows(merged)
     return path
 
 

@@ -11,7 +11,7 @@ import time
 
 import faiss
 
-from common import index_bytes, load_or_compute_truth, threads, write_rows
+from common import index_bytes, load_or_compute_truth, replace_rows, threads
 from data import load
 from metrics import median_time, recall_at_k
 
@@ -37,6 +37,12 @@ def make_index(kind, dim, build):
     if kind == "ivfpq":
         return faiss.IndexIVFPQ(quantizer, dim, build["nlist"], build["m"], PQ_NBITS), quantizer
     raise ValueError(kind)
+
+
+def time_single_queries(index, queries):
+    """One search call per query, as a serving system would issue them."""
+    for q in queries:
+        index.search(q[None, :], K)
 
 
 def set_search(index, kind, value):
@@ -85,7 +91,7 @@ def sweep(dataset, kind, data, truth_d, n_train):
                 dists, ids = index.search(q, K)
                 recall = recall_at_k(ids, dists, kth[split], K)
                 with threads(1):
-                    seconds = median_time(lambda: [index.search(x[None, :], K) for x in q], 3)
+                    seconds = median_time(lambda: time_single_queries(index, q), 3)
                 qps = len(q) / seconds
                 rows.append(dict(
                     dataset=dataset, index=kind, build=build_label(build),
@@ -97,7 +103,6 @@ def sweep(dataset, kind, data, truth_d, n_train):
             r = rows[-1]
             print(f"[{dataset}] {kind} {build_label(build)} {param_name}={value} "
                   f"recall(report)={r['recall']:.4f} qps={r['qps']:.0f}", flush=True)
-        del index, quantizer
     return rows
 
 
@@ -110,13 +115,12 @@ def main():
     parser.add_argument("--name", default="part2_ann")
     args = parser.parse_args()
 
-    all_rows = []
     for dataset in args.datasets:
         data = load(dataset, n_train=args.n_train)
         truth_d, _ = load_or_compute_truth(dataset, data["train"], data["queries"])
         for kind in args.indexes:
-            all_rows += sweep(dataset, kind, data, truth_d, len(data["train"]))
-            write_rows(all_rows, args.name)
+            rows = sweep(dataset, kind, data, truth_d, len(data["train"]))
+            replace_rows(rows, args.name)
     return 0
 
 
