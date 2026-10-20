@@ -55,22 +55,25 @@ def timing_rows(index, queries, dataset):
     return rows
 
 
-def run(dataset):
-    data = load(dataset)
+def run(dataset, n_train=None):
+    data = load(dataset, n_train=n_train)
     train = data["train"]
     report = data["queries"][data["report"]]
     d_truth, _ = load_or_compute_truth(dataset, train, data["queries"])
 
     print(f"[{dataset}] vectors={train.shape} queries(report)={report.shape}")
-    stored = stored_neighbour_check(
-        {"queries": data["queries"], "neighbours": data["neighbours"]}, d_truth, train)
-    print(f"[{dataset}] recall@10 of stored neighbours vs exact: {stored:.6f}")
+    # The stored neighbours refer to the full dataset, so the check needs all of it.
+    stored = None
+    if n_train is None:
+        stored = stored_neighbour_check(
+            {"queries": data["queries"], "neighbours": data["neighbours"]}, d_truth, train)
+        print(f"[{dataset}] recall@10 of stored neighbours vs exact: {stored:.6f}")
 
     index = faiss.IndexFlatL2(train.shape[1])
     index.add(train)
     rows = timing_rows(index, report, dataset)
     for r in rows:
-        r["recall_stored_check"] = stored
+        r["recall_stored_check"] = "" if stored is None else stored
         print(f"[{dataset}] {r['mode']}: {r['qps']:.1f} qps")
     return rows
 
@@ -78,10 +81,12 @@ def run(dataset):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--datasets", nargs="+", default=["sift", "glove"])
+    parser.add_argument("--n-train", type=int, default=None,
+                        help="use only the first N indexed vectors (quick mode)")
     args = parser.parse_args()
     all_rows = []
     for name in args.datasets:
-        all_rows += run(name)
+        all_rows += run(name, args.n_train)
     replace_rows(all_rows, "part1_exact")
     return 0
 

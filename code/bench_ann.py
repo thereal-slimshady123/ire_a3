@@ -68,14 +68,22 @@ def build_label(build):
     return ";".join(f"{k}={v}" for k, v in build.items())
 
 
-def sweep(dataset, kind, data, truth_d, builds=None):
+def quick_builds(configs):
+    """One mid-sized build setting per index, for the quick reproduction."""
+    return configs[len(configs) // 2:len(configs) // 2 + 1]
+
+
+def sweep(dataset, kind, data, truth_d, builds=None, quick=False):
     train = data["train"]
     queries = data["queries"]
     splits = {"tune": queries[data["tune"]], "report": queries[data["report"]]}
     kth = {"tune": truth_d[data["tune"]][:, K - 1], "report": truth_d[data["report"]][:, K - 1]}
     param_name, values = search_params(kind)
+    if quick:
+        values = values[::2]
     rows = []
-    for build in builds or build_configs(kind, dataset):
+    configs = builds or build_configs(kind, dataset)
+    for build in (quick_builds(configs) if quick else configs):
         t0 = time.perf_counter()
         index, quantizer = make_index(kind, train.shape[1], build)
         if kind != "hnsw":
@@ -114,13 +122,15 @@ def main():
     parser.add_argument("--n-train", type=int, default=None,
                         help="use only the first N indexed vectors (quick mode)")
     parser.add_argument("--name", default="part2_ann")
+    parser.add_argument("--quick", action="store_true",
+                        help="one build setting per index and half the search grid")
     args = parser.parse_args()
 
     for dataset in args.datasets:
         data = load(dataset, n_train=args.n_train)
         truth_d, _ = load_or_compute_truth(dataset, data["train"], data["queries"])
         for kind in args.indexes:
-            rows = sweep(dataset, kind, data, truth_d)
+            rows = sweep(dataset, kind, data, truth_d, quick=args.quick)
             replace_rows(rows, args.name)
     return 0
 

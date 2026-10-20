@@ -1,13 +1,15 @@
 """Shared helpers: result files, FAISS thread control, ground truth cache."""
 import csv
+import os
 from contextlib import contextmanager
+from pathlib import Path
 
 import faiss
 import numpy as np
 
 from data import DATA_DIR, ROOT
 
-RESULTS_DIR = ROOT / "results"
+RESULTS_DIR = Path(os.environ.get("A3_RESULTS_DIR", ROOT / "results"))
 RAW_DIR = RESULTS_DIR / "raw"
 FIGURES_DIR = RESULTS_DIR / "figures"
 TUNE_QUERIES = 5000
