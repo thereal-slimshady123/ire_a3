@@ -1,0 +1,12 @@
+\begin{tabular}{llllrrr}
+\toprule
+Dataset & Index & Build setting & Param & Build (s) & Index (MiB) & Bytes/vector \\
+\midrule
+SIFT-1M (L2) & HNSW & M=32 & efSearch=48 & 104.9 & 747.8 & 784.1 \\
+SIFT-1M (L2) & IVF-Flat & nlist=4096 & nprobe=64 & 75.8 & 497.9 & 522.1 \\
+SIFT-1M (L2) & IVF-PQ & -- & -- & -- & -- & -- \\
+GloVe-100 (normalised) & HNSW & M=32 & efSearch=384 & 359.6 & 758.6 & 672.2 \\
+GloVe-100 (normalised) & IVF-Flat & nlist=1024 & nprobe=256 & 9.5 & 460.9 & 408.4 \\
+GloVe-100 (normalised) & IVF-PQ & -- & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}

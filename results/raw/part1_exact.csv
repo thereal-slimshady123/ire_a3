@@ -1,0 +1,7 @@
+dataset,index,mode,threads,queries,seconds,qps,recall_stored_check
+glove,exact,"single query, 1 thread",1,500,51.52630709999994,9.703781003160628,1.0
+glove,exact,"batch of all queries, 1 thread",1,5000,44.738112399999864,111.76153243336246,1.0
+glove,exact,"batch of all queries, all threads",16,5000,31.230434699999932,160.10023709340206,1.0
+sift,exact,"single query, 1 thread",1,500,48.91758970000001,10.221272206304144,1.0
+sift,exact,"batch of all queries, 1 thread",1,5000,38.94430999999986,128.3884603424741,1.0
+sift,exact,"batch of all queries, all threads",16,5000,29.85804250000001,167.459069026377,1.0

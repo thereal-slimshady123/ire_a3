@@ -1,0 +1,14 @@
+\begin{tabular}{llrr}
+\toprule
+Dataset & Index & QPS @ recall 0.90 & QPS @ recall 0.95 \\
+\midrule
+SIFT-1M (L2) & Exact & \multicolumn{2}{r}{10.2 (no recall loss)} \\
+SIFT-1M (L2) & HNSW & 8373.1 & 4207.9 \\
+SIFT-1M (L2) & IVF-Flat & 2802.9 & 1620.8 \\
+SIFT-1M (L2) & IVF-PQ & 555.5 & not reached \\
+GloVe-100 (normalised) & Exact & \multicolumn{2}{r}{9.7 (no recall loss)} \\
+GloVe-100 (normalised) & HNSW & 731.1 & 496.1 \\
+GloVe-100 (normalised) & IVF-Flat & 392.0 & 96.4 \\
+GloVe-100 (normalised) & IVF-PQ & 16146.3 & not reached \\
+\bottomrule
+\end{tabular}
