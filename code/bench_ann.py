@@ -68,14 +68,14 @@ def build_label(build):
     return ";".join(f"{k}={v}" for k, v in build.items())
 
 
-def sweep(dataset, kind, data, truth_d, n_train):
+def sweep(dataset, kind, data, truth_d, builds=None):
     train = data["train"]
     queries = data["queries"]
     splits = {"tune": queries[data["tune"]], "report": queries[data["report"]]}
     kth = {"tune": truth_d[data["tune"]][:, K - 1], "report": truth_d[data["report"]][:, K - 1]}
     param_name, values = search_params(kind)
     rows = []
-    for build in build_configs(kind, dataset):
+    for build in builds or build_configs(kind, dataset):
         t0 = time.perf_counter()
         index, quantizer = make_index(kind, train.shape[1], build)
         if kind != "hnsw":
@@ -119,7 +119,7 @@ def main():
         data = load(dataset, n_train=args.n_train)
         truth_d, _ = load_or_compute_truth(dataset, data["train"], data["queries"])
         for kind in args.indexes:
-            rows = sweep(dataset, kind, data, truth_d, len(data["train"]))
+            rows = sweep(dataset, kind, data, truth_d)
             replace_rows(rows, args.name)
     return 0
 
