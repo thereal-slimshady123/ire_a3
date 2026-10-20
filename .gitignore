@@ -1,0 +1,22 @@
+# Assignment brief (not to be versioned)
+A3.pdf
+
+# Explanatory document of the assignment (generated, not to be versioned)
+docs/
+
+# Datasets and downloaded data (too large; the zip must not contain them)
+data/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
