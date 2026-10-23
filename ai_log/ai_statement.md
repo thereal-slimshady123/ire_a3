@@ -22,4 +22,4 @@ The session planned the experiments, wrote the code, ran the benchmarks, and dra
 | `report/report.tex` | AI-assisted (drafted by AI from the generated results; numbers checked against `results/`) |
 | `results/` | AI-generated (produced by the scripts above) |
 
-Prompts and responses: the full session transcript is not included here. It needs to be exported from the Claude Code session and placed in this folder before submission.
+Prompts and responses: the full session transcript is included in this folder as `session_transcript.jsonl` (raw session event log) and formatted in `prompts_and_responses.md` (clean chronological Q&A transcript).
