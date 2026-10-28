@@ -51,6 +51,8 @@ cd code
 bash run_all.sh --quick
 ```
 
+> **Windows note.** `run_all.sh` uses bash syntax (`set -euo pipefail`, `$(...)`) and requires a POSIX shell. On Windows, run it inside **Git Bash** (ships with Git for Windows) or **WSL**. In Git Bash: open the Git Bash terminal, `cd` to the `code/` directory, and run `bash run_all.sh`.
+
 Individual steps can be run on their own, for example `python bench_ann.py --datasets glove --indexes hnsw`. Each script replaces only the rows it produced, so partial reruns do not discard other results.
 
 ## Method notes
